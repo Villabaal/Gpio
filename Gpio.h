@@ -13,11 +13,11 @@ class gpio{
             };
 
         template<gpio_num_t PIN>
-        static constexpr bool get(){ return gpio_get_level(PIN); }
+        [[nodiscard]] static constexpr bool get(){ return gpio_get_level(PIN); }
 
         template<gpio_num_t PIN,bool INV>
         struct Output{ 
-            static constexpr esp_err_t set(const bool state){
+            [[nodiscard]] static constexpr esp_err_t set(const bool state){
                 if constexpr (INV) return gpio_set_level(PIN, !state );
                 else return gpio_set_level(PIN, state );
             };
