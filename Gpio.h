@@ -25,7 +25,6 @@ class gpio{
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
             .intr_type    = GPIO_INTR_DISABLE
         };
-
         struct Input{
             [[nodiscard]] static inline constexpr bool get(){ return gpio_get_level(PIN); }
         };
