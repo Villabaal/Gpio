@@ -35,14 +35,14 @@ class gpio{
 
         template< bool INV >
         struct Output: Input{ 
-            /// @brief Modo de uso del pin (entrada ó salida)
+            /// @brief Imprime el estado en la salida.
             ///
-            /// @param[in] state : Imprime el estado en la salida.          
-            [[nodiscard]] static inline constexpr esp_err_t set(const bool state){
+            /// @param[in] state : estado a imrpimir          
+            [[nodiscard]] static inline constexpr esp_err_t set(const bool& state){
                 if constexpr (INV) return gpio_set_level(PIN, !state );
                 else return gpio_set_level(PIN, state );
             };
-            /// @brief Invierte el estado de salida.              
+            /// @brief invierte la salida                    
             [[nodiscard]] static inline constexpr esp_err_t set()
                 { return gpio_set_level(PIN, !Input::get() ); };  
         };
@@ -68,6 +68,7 @@ class gpio{
                 }
                 return status ;
             };
+            /// @brief Lee el estado del pin
             static constexpr auto& get = modo::get;
 
         };
