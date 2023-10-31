@@ -7,7 +7,7 @@
 /// @tparam[in] PIN : numero de pin tipo gpio_num_t 
 template< gpio_num_t PIN >
 class gpio{
-        [[nodiscard]] static constexpr bool is_GPI() noexcept {
+        [[nodiscard]] static consteval bool is_GPI() noexcept {
             if constexpr (  GPIO_NUM_34 == PIN ) return true;
             else if constexpr (  GPIO_NUM_35 == PIN ) return true;
             else if constexpr (  GPIO_NUM_36 == PIN ) return true;
@@ -16,11 +16,15 @@ class gpio{
             else if constexpr (  GPIO_NUM_39 == PIN ) return true;
             else return false;
         }
-
-        template< bool GPIO >
+        template< gpio_mode_t MODE >
+        [[nodiscard]] static consteval gpio_mode_t mode_select() noexcept{
+            if constexpr ( GPIO_MODE_INPUT == MODE ) return GPIO_MODE_INPUT;
+            else return GPIO_MODE_INPUT_OUTPUT;
+        }
+        template< bool GPIO, gpio_mode_t MODE >
         static constexpr gpio_config_t _cfg{
             .pin_bit_mask = static_cast<uint64_t>(1) << PIN,
-            .mode         = static_cast<gpio_mode_t>( 2*GPIO + 1 ),
+            .mode         = mode_select< MODE >(),
             .pull_up_en   = static_cast<gpio_pullup_t>( GPIO ),
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
             .intr_type    = GPIO_INTR_DISABLE
@@ -57,7 +61,7 @@ class gpio{
             static_assert(  !( (MODE != GPIO_MODE_INPUT) && is_GPI() ) , "Ese pin no puede ser usado como salida" );
             /// @brief Inicializa el pin 
             [[nodiscard]] static esp_err_t init(){
-                esp_err_t&& status { gpio_config( &_cfg< !is_GPI() > ) };
+                esp_err_t&& status { gpio_config( &_cfg< !is_GPI(), MODE > ) };
                 if constexpr (MODE == GPIO_MODE_OUTPUT){
                     if ( ESP_OK != status ) return status;
                     status = modo::set( INV );
@@ -67,4 +71,4 @@ class gpio{
             static constexpr auto& get = modo::get;
 
         };
-    };
+};

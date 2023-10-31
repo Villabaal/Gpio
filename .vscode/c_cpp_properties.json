@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/driver/gpio/include",
+                "/home/villabaal/Documents/PlatformIO/Projects/ESP32_studies/.pio/build/esp32doit-devkit-v1/config",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/esp_common/include",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/esp_hw_support/include",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/soc/esp32/include",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/hal/include",
+                "/home/villabaal/.platformio/packages/framework-espidf/components/esp_rom/include"
+            ],
+            "defines": [],
+            "compilerPath": "/home/villabaal/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x86"
+        }
+    ],
+    "version": 4
+}
