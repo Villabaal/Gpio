@@ -1,6 +1,7 @@
 #pragma once
 #include "Gpio.h"
 #include <chrono>
+#include <thread>
 
 /// @brief boton metodo polling
 ///
@@ -14,28 +15,33 @@ class Button {
 public:
     /// @brief inicializa el botón
     static constexpr auto& init { pin::init };
+    /// @brief inicia el polling para observar el boton
+    void begin() { 
+        std::thread polling { [this](){ while (true) (*this)(); }};
+        polling.detach();
+    };
     /// @brief handler del evento persionar boton
-    static std::function<void()> onPress;
+    std::function<void()> onPress {nullptr};
     /// @brief handler del evento de mantener presionado
-    static std::function<void()> onHold;
+    std::function<void()> onHold {nullptr};
     /// @brief handler del evento soltar boton
-    static std::function<void()> onRelease;
-	/// @brief Debe estar en un ciclo
-	static void polling(){ 
+    std::function<void()> onRelease {nullptr};
+	/// @brief Debe estar en un ciclo	
+private:
+	void operator()(){ 
         debounce( onPress );
         while(!_state)
             { if( onHold ) onHold(); debounce( onRelease,true );  } 
-    }		
-private:
-	static bool _state,_lastState;
-    static time_point _lastDebounceTime;
+    }	
+	bool _state {true},_lastState {true};
+    time_point _lastDebounceTime {};
     static constexpr time_point (&now)() {std::chrono::system_clock::now};
     /// @brief filtra el rebote y llama la funcion si se detecta un flanco en el boton
 	///especificado por edgeDirection.
     ///
     /// @param[in] onEdge : funcion a llamar cuando el flanco es detectado
     /// @param[in] edgeDirection : flanco gatillo de onEdge (por defecto "flanco de bajada")   
-	static void debounce( std::function<void()> onEdge ,bool edgeDirection = false ) {
+	void debounce( std::function<void()> onEdge ,bool edgeDirection = false ) {
 		const bool&& reading = pin::get();
 		// checa si el boton acaba de cambiar de estado
 		if (reading != _lastState) _lastDebounceTime = now();
@@ -49,16 +55,3 @@ private:
 		_lastState = reading;
 	}
 };
-
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-Button< PIN, DB_DELAY >::time_point Button< PIN, DB_DELAY >::_lastDebounceTime {};
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-bool Button< PIN, DB_DELAY >::_state {true};
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-bool Button< PIN, DB_DELAY >::_lastState {true};
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-std::function<void()> Button< PIN, DB_DELAY >::onPress {nullptr};
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-std::function<void()> Button< PIN, DB_DELAY >::onHold {nullptr};
-template< gpio_num_t PIN, int64_t DB_DELAY > 
-std::function<void()> Button< PIN, DB_DELAY >::onRelease {nullptr};
