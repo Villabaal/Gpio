@@ -1,7 +1,6 @@
 #pragma once
 #include "Gpio.h"
 #include <chrono>
-#include <thread>
 
 /// @brief boton metodo polling
 ///
@@ -15,24 +14,19 @@ class Button {
 public:
     /// @brief inicializa el botón
     static constexpr auto& init { pin::init };
-    /// @brief inicia el polling para observar el boton
-    void begin() { 
-        std::thread polling { [this](){ while (true) (*this)(); }};
-        polling.detach();
-    };
     /// @brief handler del evento persionar boton
     std::function<void()> onPress {nullptr};
     /// @brief handler del evento de mantener presionado
     std::function<void()> onHold {nullptr};
     /// @brief handler del evento soltar boton
     std::function<void()> onRelease {nullptr};
-	/// @brief Debe estar en un ciclo	
-private:
-	void operator()(){ 
+	/// @brief Debe estar en un ciclo
+    void operator()(){ 
         debounce( onPress );
         while(!_state)
             { if( onHold ) onHold(); debounce( onRelease,true );  } 
     }	
+private:
 	bool _state {true},_lastState {true};
     time_point _lastDebounceTime {};
     static constexpr time_point (&now)() {std::chrono::system_clock::now};
