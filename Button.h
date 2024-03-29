@@ -21,7 +21,7 @@ class Button {
     using time_point = std::chrono::_V2::system_clock::time_point;
     using pin = typename gpio< PIN >::direction< GPIO_MODE_INPUT >;
 
-    std::array<std::function<void()>,3> callbacks {};
+    std::function<void()> callbacks[3] {};
     /// @brief handler del evento persionar boton
     std::function<void()> &onPress {callbacks[0]};
     /// @brief handler del evento de mantener presionado
@@ -59,8 +59,7 @@ private:
 		// checa si el boton acaba de cambiar de estado
 		if (reading != _lastState) _lastDebounceTime = now();
 		//debounce y detecta los flancos
-        ms&& interval {std::chrono::duration_cast< ms >( now() - _lastDebounceTime )};
-        if ( ( interval > delayTime ) && (reading != _state)) {
+        if ( (now()-_lastDebounceTime > delayTime) && (reading != _state)) {
 		    _state = reading; 
             if( (reading == edgeDirection) && onEdge ) onEdge(); 
             return;
