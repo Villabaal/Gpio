@@ -2,7 +2,7 @@
 #include "Gpio.h"
 #include <chrono>
 #include <concepts>
-#include <array>
+#include <functional>
 
 enum class button_event_t {
     on_press,  /*Cuando el botón es presionado*/
