@@ -37,7 +37,7 @@ class gpio{
         struct Output: Input{ 
             /// @brief Imprime el estado en la salida.
             ///
-            /// @param[in] state : estado a imrpimir          
+            /// @param[in] state : estado a imprimir          
             [[nodiscard]] static inline constexpr esp_err_t set(const bool& state){
                 if constexpr (INV) return gpio_set_level(PIN, !state );
                 else return gpio_set_level(PIN, state );
@@ -59,7 +59,7 @@ class gpio{
         public:
             static_assert(  (MODE == GPIO_MODE_INPUT) || (MODE == GPIO_MODE_OUTPUT)  , "Modo invalido" );
             static_assert(  !( (MODE != GPIO_MODE_INPUT) && is_GPI() ) , "Ese pin no puede ser usado como salida" );
-            /// @brief Inicializa el pin 
+            /// @brief Inicializa el pin con el modo de operación
             [[nodiscard]] static esp_err_t init(){
                 esp_err_t&& status { gpio_config( &_cfg< !is_GPI(), MODE > ) };
                 if constexpr (MODE == GPIO_MODE_OUTPUT){
@@ -69,7 +69,7 @@ class gpio{
                 return status ;
             };
             /// @brief Lee el estado del pin
-            static constexpr auto& get = modo::get;
+            static constexpr auto& get {modo::get};
 
         };
 };
