@@ -70,9 +70,6 @@ En el archivo main.hpp
 
 #include "esp_task_wdt.h"
 
-#define LOG_LEVEL_LOCAL ESP_LOG_VERBOSE
-using namespace std::literals::chrono_literals;
-
 class Main{
     using time_point = std::chrono::_V2::system_clock::time_point;
     using led = gpio<GPIO_NUM_2>::direction<GPIO_MODE_OUTPUT>;
@@ -80,10 +77,23 @@ class Main{
     static inline Button< GPIO_NUM_4 > button {};    
     static inline time_point lastTimer {};
     static void whilePushing();
+    template< bool edge > static void on_edge();
 public:
     [[nodiscard]] static esp_err_t setup();
     static void loop();
 };
+```
+En el archivo main.cpp
+```cpp
+#include "main.h"
+#define LOG_LEVEL_LOCAL ESP_LOG_VERBOSE
+using namespace std::literals::chrono_literals;
+
+//inicia o termina el parpadeo en cada uno de los flancos del botón
+template< bool edge > void Main::on_edge(){
+    ESP_ERROR_CHECK( led::set(!edge) );
+    if constexpr (!edge) lastTimer = now();
+}
 
 //invierte el estado del led cada 0.5s
 void Main::whilePushing(){
@@ -97,9 +107,9 @@ esp_err_t Main::setup(){
     esp_err_t &&status {led::init()};  if (ESP_OK != status) return status;
     status =  button.init();  if (ESP_OK != status) return status;
     //enciende el led al presionar
-    button.setCallback( on_press, [](){ ESP_ERROR_CHECK( led::set(true) ); lastTimer = now(); } );
+    button.setCallback( on_release, on_edge< false > );
     //apaga el led al dejar de presionar
-    button.setCallback( on_release, [](){ ESP_ERROR_CHECK( led::set(false) ); } );
+    button.setCallback( on_release, on_edge< true > );
     //parpadea el led mientras se mantiene el botón presionado
     button.setCallback( on_hold, whilePushing );
     return ESP_OK;
@@ -108,10 +118,6 @@ esp_err_t Main::setup(){
 void Main::loop(){
     button();
 }
-```
-En el archivo main.cpp
-```cpp
-#include "main.h"
 
 extern "C" void app_main(){  
     ESP_ERROR_CHECK( Main::setup() ); 
